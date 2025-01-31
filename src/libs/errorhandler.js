@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
+import jwt from "jsonwebtoken";
 
 export const errorHandler = (error, req, res, next) => {
   console.error("Error logged in error handler:--", error?.message);
@@ -27,11 +28,18 @@ export const errorHandler = (error, req, res, next) => {
         return;
     }
   }
-
+//TODO handle wrong value error
   if (error?.cause == "CustomError") {
     res.status(StatusCodes.UNAUTHORIZED).json({
       error: "Unauthorized error",
       message: error.message,
+    });
+  }
+
+  if (error instanceof jwt.JsonWebTokenError){
+    res.status(StatusCodes.UNAUTHORIZED).json({
+      error: "Unauthorized error",
+      message: "Invalid token",
     });
   }
 
