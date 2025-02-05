@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
+import { ZodError } from "zod";
 
 export const errorHandler = (error, req, res, next) => {
   console.error("Error logged in error handler:--", error?.message);
@@ -28,7 +29,16 @@ export const errorHandler = (error, req, res, next) => {
         return;
     }
   }
-//TODO handle wrong value error
+
+  if (error instanceof ZodError) {
+    const errorMessages = error.errors.map((issue) => ({
+      message: `${issue.path.join(".")} is ${issue.message}`,
+    }));
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ error: "Invalid data", message: errorMessages });
+  }
+
   if (error?.cause == "CustomError") {
     res.status(StatusCodes.UNAUTHORIZED).json({
       error: "Unauthorized error",
@@ -36,7 +46,7 @@ export const errorHandler = (error, req, res, next) => {
     });
   }
 
-  if (error instanceof jwt.JsonWebTokenError){
+  if (error instanceof jwt.JsonWebTokenError) {
     res.status(StatusCodes.UNAUTHORIZED).json({
       error: "Unauthorized error",
       message: "Invalid token",
