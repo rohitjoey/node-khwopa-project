@@ -54,6 +54,13 @@ export const errorHandler = (error, req, res, next) => {
     });
   }
 
+  if (error?.cause == "UnauthorizedError") {
+    return res.status(StatusCodes.NOT_FOUND).json({
+      error: "Unauthorized Error",
+      message: error.message,
+    });
+  }
+
   if (error instanceof jwt.JsonWebTokenError) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
       error: "Unauthorized error",
