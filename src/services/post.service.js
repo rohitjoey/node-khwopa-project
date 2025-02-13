@@ -1,7 +1,25 @@
 import { prisma } from "../db/index.js";
 
-export const getPostService = async () => {
-  const posts = await prisma.post.findMany();
+export const getPostService = async (query) => {
+  let searchTerm = "";
+  if (query.search) {
+    searchTerm = query.search;
+  }
+
+  const posts = await prisma.post.findMany({
+    where: {
+      OR: [
+        {
+          content: { contains: searchTerm, mode: "insensitive" },
+        },
+        {
+          User: { fullName: { contains: searchTerm, mode: "insensitive" } },
+        },
+      ],
+    },
+    include: { User: { omit: { password: true } } },
+    orderBy: { createdAt: "desc" },
+  });
   return posts;
 };
 
@@ -64,7 +82,15 @@ export const updatePostService = async (postId, loggedInUserId, updateData) => {
   //   }
   // }
 
-
+  if (updateData.like) {
+    const data = await prisma.post.update({
+      where: { id: postId },
+      data: {
+        likesCount: post.likesCount + 1,
+      },
+    });
+    return data;
+  }
 
   // if (updateData.content) {
   //   post.content = updateData.content;
@@ -79,7 +105,6 @@ export const updatePostService = async (postId, loggedInUserId, updateData) => {
       where: { id: postId },
       data: {
         content: updateData.content,
-        likesCount: updateData.likeFlag ? post.likesCount + 1 : post.likesCount,
       },
     });
     return data;

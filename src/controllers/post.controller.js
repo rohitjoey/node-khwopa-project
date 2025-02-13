@@ -11,7 +11,7 @@ import { createPostSchema, updatePostSchema } from "../schemas/post.schema.js";
 
 export const getAllPostsController = async (req, res, next) => {
   try {
-    const posts = await getPostService();
+    const posts = await getPostService(req.query);
     res.status(StatusCodes.OK).json(posts);
   } catch (error) {
     next(error);
