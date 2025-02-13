@@ -17,12 +17,12 @@ export const socketHandler = (httpServer) => {
         }
       });
 
-      socket.join(room.roomId);
+      socket.join(roomObject.roomId);
       room = roomObject.roomId;
     });
 
     socket.on("sendMessage", (data) => {
-      io.to(room).emit("sendMessageServer", data);
+      io.to(room).emit("sendMessageServer", data.message);
     });
   });
 };
