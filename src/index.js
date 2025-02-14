@@ -8,6 +8,7 @@ import { errorHandler } from "./libs/errorhandler.js";
 import postRouter from "./routes/post.routes.js";
 import userRouter from "./routes/user.routes.js";
 import { socketHandler } from "./socket/socket.js";
+import router from "./auth/google-auth.route.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/users", userRouter);
 app.use("/api/posts", postRouter);
+app.use(router)
 
 
 app.use(errorHandler);
